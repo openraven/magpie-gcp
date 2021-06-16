@@ -46,7 +46,8 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
     new WebSecurityScanner(),
     new KMSDiscovery(),
     new FunctionsDiscovery(),
-    new RecaptchaEnterpriseDiscovery());
+    new RecaptchaEnterpriseDiscovery(),
+    new TextToSpeechDiscovery());
 
   GCPDiscoveryConfig config;
 
