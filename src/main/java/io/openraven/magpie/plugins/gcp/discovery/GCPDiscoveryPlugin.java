@@ -35,6 +35,7 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
   private static final List<GCPDiscovery> DISCOVERY_LIST = List.of(
     new AutoMLDiscovery(),
     new BigQueryDiscovery(),
+    new BigTableDiscovery(),
     new ClusterDiscovery(),
     new SecretDiscovery(),
     new RedisDiscovery(),
@@ -42,6 +43,7 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
     new IoTDiscovery(),
     new DataCatalogDiscovery(),
     new TasksDiscovery(),
+    new KMSDiscovery(),
     new FunctionsDiscovery());
 
   GCPDiscoveryConfig config;
