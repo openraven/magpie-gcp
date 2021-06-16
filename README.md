@@ -67,4 +67,4 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [ ]  Video Intelligence API
 - [ ]  Web Risk
 - [ ]  Web Security Scanner
-- [ ]  reCAPTCHA Enterprise
+- [x]  reCAPTCHA Enterprise
