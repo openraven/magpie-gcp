@@ -63,7 +63,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [ ]  Security Command Center
 - [ ]  Service Directory
 - [ ]  Speech-to-Text
-- [ ]  Text-to-Speech
+- [x]  Text-to-Speech
 - [ ]  Video Intelligence API
 - [ ]  Web Risk
 - [x]  Web Security Scanner
