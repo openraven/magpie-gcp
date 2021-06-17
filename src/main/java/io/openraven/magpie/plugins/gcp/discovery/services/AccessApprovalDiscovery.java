@@ -47,7 +47,7 @@ public class AccessApprovalDiscovery implements GCPDiscovery {
         var data = new GCPResource(approvalRequest.getName(), projectId, RESOURCE_TYPE);
         data.configuration = GCPUtils.asJsonNode(approvalRequest);
 
-        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":key"), data.toJsonNode()));
+        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":approvalRequest"), data.toJsonNode()));
       }
     } catch (IOException e) {
       DiscoveryExceptions.onDiscoveryException(RESOURCE_TYPE, e);
