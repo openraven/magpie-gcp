@@ -18,7 +18,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [ ]  Cloud Bigtable
 - [ ]  Cloud Billing
 - [ ]  Cloud Billing Budget API
-- [ ]  Cloud Build
+- [x]  Cloud Build
 - [ ]  Cloud DNS
 - [ ]  Cloud Data Loss Prevention
 - [x]  Cloud Functions
