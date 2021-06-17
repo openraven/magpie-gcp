@@ -19,7 +19,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [ ]  Cloud Billing
 - [ ]  Cloud Billing Budget API
 - [ ]  Cloud Build
-- [ ]  Cloud DNS
+- [x]  Cloud DNS
 - [ ]  Cloud Data Loss Prevention
 - [x]  Cloud Functions
 - [x]  Cloud Key Management Service

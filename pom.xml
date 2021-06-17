@@ -139,6 +139,11 @@
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-asset</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-dns</artifactId>
+    </dependency>
+
 
     <dependency>
       <groupId>com.google.appengine</groupId>
