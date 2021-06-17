@@ -135,6 +135,10 @@
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-websecurityscanner</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-billing</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>com.google.appengine</groupId>
