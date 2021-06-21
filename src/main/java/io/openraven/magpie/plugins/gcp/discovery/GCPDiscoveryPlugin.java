@@ -34,12 +34,18 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
   public final static String ID = "magpie.gcp.discovery";
 
   private static final List<GCPDiscovery> DISCOVERY_LIST = List.of(
+    new AccessApprovalDiscovery(),
     new AutoMLDiscovery(),
     new AssetDiscovery(),
     new BigQueryDiscovery(),
+    new BigQueryReservationDiscovery(),
     new BigQueryDataTransferDiscovery(),
     new BigTableDiscovery(),
+    new BillingDiscovery(),
     new ClusterDiscovery(),
+    new DlpDiscovery(),
+    new DnsDiscovery(),
+    new DataLabelingDiscovery(),
     new SecretDiscovery(),
     new RedisDiscovery(),
     new MemcacheDiscovery(),
