@@ -37,7 +37,7 @@ public class DnsDiscovery implements GCPDiscovery {
   }
 
   public void discover(String projectId, Session session, Emitter emitter, Logger logger) {
-    final String RESOURCE_TYPE = "GCP::Dns::zone";
+    final String RESOURCE_TYPE = "GCP::Dns::Zone";
 
     var dnsInstance = DnsOptions.getDefaultInstance().getService();
 
