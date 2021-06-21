@@ -69,6 +69,10 @@
 
     <dependency>
       <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-accessapproval</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-secretmanager</artifactId>
     </dependency>
     <dependency>
@@ -94,6 +98,10 @@
     <dependency>
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-bigqueryreservation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-bigquerydatatransfer</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.cloud</groupId>
@@ -134,6 +142,14 @@
     <dependency>
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-websecurityscanner</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-asset</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-datalabeling</artifactId>
     </dependency>
 
     <dependency>
