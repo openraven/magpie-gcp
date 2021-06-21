@@ -6,15 +6,14 @@ To use this plugin save .json file with authentication key to file then set:
 export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 
 # Supported services
-- [ ]  AI Platform Data Labeling Service
+- [x]  AI Platform Data Labeling Service
 - [x]  Access Approval
 - [x]  AutoML
 - [x]  BigQuery
-- [ ]  BigQuery Connection API
-- [ ]  BigQuery Data Transfer Service
+- [x]  BigQuery Data Transfer Service
 - [ ]  BigQuery Reservation API
 - [ ]  BigQuery Storage
-- [ ]  Cloud Asset Inventory
+- [x]  Cloud Asset Inventory
 - [x]  Cloud Bigtable
 - [ ]  Cloud Bigtable
 - [ ]  Cloud Billing
