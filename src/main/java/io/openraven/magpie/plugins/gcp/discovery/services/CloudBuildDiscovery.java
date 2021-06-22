@@ -16,11 +16,12 @@
 
 package io.openraven.magpie.plugins.gcp.discovery.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.devtools.cloudbuild.v1.CloudBuildClient;
 import io.openraven.magpie.api.Emitter;
+import io.openraven.magpie.api.MagpieResource;
 import io.openraven.magpie.api.Session;
 import io.openraven.magpie.plugins.gcp.discovery.DiscoveryExceptions;
-import io.openraven.magpie.plugins.gcp.discovery.GCPResource;
 import io.openraven.magpie.plugins.gcp.discovery.GCPUtils;
 import io.openraven.magpie.plugins.gcp.discovery.VersionedMagpieEnvelopeProvider;
 import org.slf4j.Logger;
@@ -36,32 +37,38 @@ public class CloudBuildDiscovery implements GCPDiscovery {
     return SERVICE;
   }
 
-  public void discover(String projectId, Session session, Emitter emitter, Logger logger) {
+  public void discover(ObjectMapper mapper, String projectId, Session session, Emitter emitter, Logger logger) {
     try (CloudBuildClient cloudBuildClient = CloudBuildClient.create()) {
-      discoverBuildTriggers(projectId, session, emitter, cloudBuildClient);
-      discoverBuilds(projectId, session, emitter, cloudBuildClient);
+      discoverBuildTriggers(mapper, projectId, session, emitter, cloudBuildClient);
+      discoverBuilds(mapper, projectId, session, emitter, cloudBuildClient);
     } catch (IOException e) {
       DiscoveryExceptions.onDiscoveryException("CloudBuild", e);
     }
   }
 
-  private void discoverBuildTriggers(String projectId, Session session, Emitter emitter, CloudBuildClient cloudBuildClient) {
+  private void discoverBuildTriggers(ObjectMapper mapper, String projectId, Session session, Emitter emitter, CloudBuildClient cloudBuildClient) {
     final String RESOURCE_TYPE = "GCP::CloudBuild::BuildTrigger";
 
     for (var element : cloudBuildClient.listBuildTriggers(projectId).iterateAll()) {
-      var data = new GCPResource(element.getName(), projectId, RESOURCE_TYPE);
-      data.configuration = GCPUtils.asJsonNode(element);
+      var data = new MagpieResource.MagpieResourceBuilder(mapper, element.getName())
+        .withProjectId(projectId)
+        .withResourceType(RESOURCE_TYPE)
+        .withConfiguration(GCPUtils.asJsonNode(element))
+        .build();
 
       emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":buildTrigger"), data.toJsonNode()));
     }
   }
 
-  private void discoverBuilds(String projectId, Session session, Emitter emitter, CloudBuildClient cloudBuildClient) {
+  private void discoverBuilds(ObjectMapper mapper, String projectId, Session session, Emitter emitter, CloudBuildClient cloudBuildClient) {
     final String RESOURCE_TYPE = "GCP::CloudBuild::Build";
 
     for (var element : cloudBuildClient.listBuilds(projectId, "").iterateAll()) {
-      var data = new GCPResource(element.getName(), projectId, RESOURCE_TYPE);
-      data.configuration = GCPUtils.asJsonNode(element);
+      var data = new MagpieResource.MagpieResourceBuilder(mapper, element.getName())
+        .withProjectId(projectId)
+        .withResourceType(RESOURCE_TYPE)
+        .withConfiguration(GCPUtils.asJsonNode(element))
+        .build();
 
       emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":builds"), data.toJsonNode()));
     }
