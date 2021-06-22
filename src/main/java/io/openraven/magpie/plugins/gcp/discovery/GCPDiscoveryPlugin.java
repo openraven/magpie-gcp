@@ -16,6 +16,8 @@
 
 package io.openraven.magpie.plugins.gcp.discovery;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
 import io.openraven.magpie.api.Emitter;
@@ -31,17 +33,26 @@ import java.util.List;
 public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
 
   public final static String ID = "magpie.gcp.discovery";
+  protected static final ObjectMapper MAPPER = GCPUtils.createObjectMapper();
 
   private static final List<GCPDiscovery> DISCOVERY_LIST = List.of(
+    new AccessApprovalDiscovery(),
     new AutoMLDiscovery(),
+    new AssetDiscovery(),
     new BigQueryDiscovery(),
+    new BigQueryReservationDiscovery(),
     new BigQueryDataTransferDiscovery(),
     new BigTableDiscovery(),
+    new BillingDiscovery(),
     new ClusterDiscovery(),
     new CloudBuildDiscovery(),
+    new DlpDiscovery(),
+    new DnsDiscovery(),
+    new DataLabelingDiscovery(),
     new SecretDiscovery(),
     new RedisDiscovery(),
     new MemcacheDiscovery(),
+    new MonitoringDiscovery(),
     new IoTDiscovery(),
     new DataCatalogDiscovery(),
     new TasksDiscovery(),
@@ -59,8 +70,13 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
     getProjectList().forEach(project -> DISCOVERY_LIST
       .stream()
       .filter(service -> isEnabled(service.service()))
-      .forEach(gcpDiscovery ->
-        gcpDiscovery.discoverWrapper(project.getProjectId(), session, emitter, logger)));
+      .forEach(gcpDiscovery -> {
+        try {
+          gcpDiscovery.discoverWrapper(MAPPER, project.getProjectId(), session, emitter, logger);
+        } catch (PermissionDeniedException permissionDeniedException) {
+          logger.error("{} While discovering {} service in {}", permissionDeniedException.getMessage(), gcpDiscovery.service(), project.getProjectId());
+        }
+      }));
   }
 
   Iterable<Project> getProjectList() {
