@@ -16,14 +16,15 @@
 
 package io.openraven.magpie.plugins.gcp.discovery.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.logging.v2.ConfigClient;
 import com.google.cloud.logging.v2.MetricsClient;
 import com.google.logging.v2.LocationName;
 import com.google.logging.v2.ProjectName;
 import io.openraven.magpie.api.Emitter;
+import io.openraven.magpie.api.MagpieResource;
 import io.openraven.magpie.api.Session;
 import io.openraven.magpie.plugins.gcp.discovery.DiscoveryExceptions;
-import io.openraven.magpie.plugins.gcp.discovery.GCPResource;
 import io.openraven.magpie.plugins.gcp.discovery.GCPUtils;
 import io.openraven.magpie.plugins.gcp.discovery.VersionedMagpieEnvelopeProvider;
 import org.slf4j.Logger;
@@ -39,19 +40,22 @@ public class LoggingDiscovery implements GCPDiscovery {
     return SERVICE;
   }
 
-  public void discover(String projectId, Session session, Emitter emitter, Logger logger) {
-    discoverMetrics(projectId, session, emitter);
-    discoverConfigClientResources(projectId, session, emitter);
+  public void discover(ObjectMapper mapper, String projectId, Session session, Emitter emitter, Logger logger) {
+    discoverMetrics(mapper, projectId, session, emitter);
+    discoverConfigClientResources(mapper, projectId, session, emitter);
   }
 
-  private void discoverMetrics(String projectId, Session session, Emitter emitter) {
+  private void discoverMetrics(ObjectMapper mapper, String projectId, Session session, Emitter emitter) {
     final String RESOURCE_TYPE = "GCP::Logging::Metric";
 
     try (MetricsClient metricsClient = MetricsClient.create()) {
       String parent = ProjectName.of(projectId).toString();
       for (var metric : metricsClient.listLogMetrics(parent).iterateAll()) {
-        var data = new GCPResource(metric.getName(), projectId, RESOURCE_TYPE);
-        data.configuration = GCPUtils.asJsonNode(metric);
+        var data = new MagpieResource.MagpieResourceBuilder(mapper, metric.getName())
+          .withProjectId(projectId)
+          .withResourceType(RESOURCE_TYPE)
+          .withConfiguration(GCPUtils.asJsonNode(metric))
+          .build();
 
         emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":metric"), data.toJsonNode()));
       }
@@ -60,47 +64,56 @@ public class LoggingDiscovery implements GCPDiscovery {
     }
   }
 
-  private void discoverConfigClientResources(String projectId, Session session, Emitter emitter) {
+  private void discoverConfigClientResources(ObjectMapper mapper, String projectId, Session session, Emitter emitter) {
     try (ConfigClient configClient = ConfigClient.create()) {
-      discoverSinks(projectId, session, emitter, configClient);
-      discoverBuckets(projectId, session, emitter, configClient);
-      discoverExclusions(projectId, session, emitter, configClient);
+      discoverSinks(mapper, projectId, session, emitter, configClient);
+      discoverBuckets(mapper, projectId, session, emitter, configClient);
+      discoverExclusions(mapper, projectId, session, emitter, configClient);
     } catch (IOException e) {
       DiscoveryExceptions.onDiscoveryException("GCP::Logging::ConfigClient", e);
     }
   }
 
-  private void discoverSinks(String projectId, Session session, Emitter emitter, ConfigClient configClient) {
+  private void discoverSinks(ObjectMapper mapper, String projectId, Session session, Emitter emitter, ConfigClient configClient) {
     final String RESOURCE_TYPE = "GCP::Logging::Sink";
 
     ProjectName parent = ProjectName.of(projectId);
     for (var sink : configClient.listSinks(parent).iterateAll()) {
-      var data = new GCPResource(sink.getName(), projectId, RESOURCE_TYPE);
-      data.configuration = GCPUtils.asJsonNode(sink);
+      var data = new MagpieResource.MagpieResourceBuilder(mapper, sink.getName())
+        .withProjectId(projectId)
+        .withResourceType(RESOURCE_TYPE)
+        .withConfiguration(GCPUtils.asJsonNode(sink))
+        .build();
 
       emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":sink"), data.toJsonNode()));
     }
   }
 
-  private void discoverBuckets(String projectId, Session session, Emitter emitter, ConfigClient configClient) {
+  private void discoverBuckets(ObjectMapper mapper, String projectId, Session session, Emitter emitter, ConfigClient configClient) {
     final String RESOURCE_TYPE = "GCP::Logging::Bucket";
 
     var parent = LocationName.of(projectId, "-");
-    for (var sink : configClient.listBuckets(parent).iterateAll()) {
-      var data = new GCPResource(sink.getName(), projectId, RESOURCE_TYPE);
-      data.configuration = GCPUtils.asJsonNode(sink);
+    for (var bucket : configClient.listBuckets(parent).iterateAll()) {
+      var data = new MagpieResource.MagpieResourceBuilder(mapper, bucket.getName())
+        .withProjectId(projectId)
+        .withResourceType(RESOURCE_TYPE)
+        .withConfiguration(GCPUtils.asJsonNode(bucket))
+        .build();
 
       emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":bucket"), data.toJsonNode()));
     }
   }
 
-  private void discoverExclusions(String projectId, Session session, Emitter emitter, ConfigClient configClient) {
+  private void discoverExclusions(ObjectMapper mapper, String projectId, Session session, Emitter emitter, ConfigClient configClient) {
     final String RESOURCE_TYPE = "GCP::Logging::Exclusion";
 
     var parent = ProjectName.of(projectId);
     for (var exclusion : configClient.listExclusions(parent).iterateAll()) {
-      var data = new GCPResource(exclusion.getName(), projectId, RESOURCE_TYPE);
-      data.configuration = GCPUtils.asJsonNode(exclusion);
+      var data = new MagpieResource.MagpieResourceBuilder(mapper, exclusion.getName())
+        .withProjectId(projectId)
+        .withResourceType(RESOURCE_TYPE)
+        .withConfiguration(GCPUtils.asJsonNode(exclusion))
+        .build();
 
       emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":exclusion"), data.toJsonNode()));
     }
