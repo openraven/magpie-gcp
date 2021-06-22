@@ -16,6 +16,7 @@
 
 package io.openraven.magpie.plugins.gcp.discovery;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
@@ -32,17 +33,25 @@ import java.util.List;
 public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
 
   public final static String ID = "magpie.gcp.discovery";
+  protected static final ObjectMapper MAPPER = GCPUtils.createObjectMapper();
 
   private static final List<GCPDiscovery> DISCOVERY_LIST = List.of(
+    new AccessApprovalDiscovery(),
     new AutoMLDiscovery(),
     new AssetDiscovery(),
     new BigQueryDiscovery(),
+    new BigQueryReservationDiscovery(),
     new BigQueryDataTransferDiscovery(),
     new BigTableDiscovery(),
+    new BillingDiscovery(),
     new ClusterDiscovery(),
+    new DlpDiscovery(),
+    new DnsDiscovery(),
+    new DataLabelingDiscovery(),
     new SecretDiscovery(),
     new RedisDiscovery(),
     new MemcacheDiscovery(),
+    new MonitoringDiscovery(),
     new IoTDiscovery(),
     new LoggingDiscovery(),
     new DataCatalogDiscovery(),
@@ -63,9 +72,9 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
       .filter(service -> isEnabled(service.service()))
       .forEach(gcpDiscovery -> {
         try {
-          gcpDiscovery.discoverWrapper(project.getProjectId(), session, emitter, logger);
+          gcpDiscovery.discoverWrapper(MAPPER, project.getProjectId(), session, emitter, logger);
         } catch (PermissionDeniedException permissionDeniedException) {
-          logger.error("{} While discovering {} service in {}",permissionDeniedException.getMessage(), gcpDiscovery.service(), project.getProjectId());
+          logger.error("{} While discovering {} service in {}", permissionDeniedException.getMessage(), gcpDiscovery.service(), project.getProjectId());
         }
       }));
   }
