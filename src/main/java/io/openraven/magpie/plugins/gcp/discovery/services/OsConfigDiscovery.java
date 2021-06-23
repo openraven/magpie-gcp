@@ -80,15 +80,14 @@ public class OsConfigDiscovery implements GCPDiscovery {
   private void discoverPatchDeployments(ObjectMapper mapper, String projectId, Session session, Emitter emitter, OsConfigServiceClient client) {
     final String RESOURCE_TYPE = "GCP::OsConfig::PatchDeployment";
 
-    for (var patchJob : client.listPatchDeployments(ProjectName.of(projectId)).iterateAll()) {
-      var data = new MagpieResource.MagpieResourceBuilder(mapper, patchJob.getName())
+    for (var patchDeployment : client.listPatchDeployments(ProjectName.of(projectId)).iterateAll()) {
+      var data = new MagpieResource.MagpieResourceBuilder(mapper, patchDeployment.getName())
         .withProjectId(projectId)
         .withResourceType(RESOURCE_TYPE)
-        .withConfiguration(GCPUtils.asJsonNode(patchJob))
+        .withConfiguration(GCPUtils.asJsonNode(patchDeployment))
         .build();
 
-
-      emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":patchJob"), data.toJsonNode()));
+      emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":patchDeployment"), data.toJsonNode()));
     }
   }
 }
