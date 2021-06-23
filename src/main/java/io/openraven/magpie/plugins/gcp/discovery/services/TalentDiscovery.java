@@ -39,7 +39,7 @@ public class TalentDiscovery implements GCPDiscovery {
   }
 
   public void discover(ObjectMapper mapper, String projectId, Session session, Emitter emitter, Logger logger) {
-    final String RESOURCE_TYPE = "GCP::Talent::Bucket";
+    final String RESOURCE_TYPE = "GCP::Talent::Tenant";
 
     try (var tenantServiceClient = TenantServiceClient.create()) {
       for (var tenant : tenantServiceClient.listTenants(ProjectName.of(projectId)).iterateAll()) {
