@@ -17,19 +17,19 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [x]  Cloud Asset Inventory
 - [x]  Cloud Bigtable
 - [x]  Cloud Billing
-- [ ]  Cloud Build
+- [x]  Cloud Build
 - [x]  Cloud Data Loss Prevention
 - [x]  Cloud DNS
 - [x]  Cloud Functions
 - [x]  Cloud Key Management Service
-- [ ]  Cloud Logging
+- [x]  Cloud Logging
 - [x]  Cloud Monitoring
-- [ ]  Cloud Monitoring Dashboards
+- [x]  Cloud Monitoring Dashboards
 - [ ]  Cloud Natural Language API
 - [ ]  Cloud OS Config
 - [ ]  Cloud OS Login API
-- [ ]  Cloud Scheduler
 - [x]  Cloud Spanner
+- [x]  Cloud Scheduler
 - [ ]  Cloud Storage
 - [ ]  Cloud Talent Solution Job Search
 - [x]  Cloud Tasks
