@@ -48,7 +48,8 @@ public class ComputeEngineDiscovery implements GCPDiscovery {
 
     try (var client = ZoneClient.create()) {
       for (var zone : client.listZones(projectId).iterateAll()) {
-        var data = new MagpieResource.MagpieResourceBuilder(mapper, zone.getName())
+        String assetId = String.format("%s::%s", RESOURCE_TYPE, zone.getName());
+        var data = new MagpieResource.MagpieResourceBuilder(mapper, assetId)
           .withProjectId(projectId)
           .withResourceType(RESOURCE_TYPE)
           .withConfiguration(GCPUtils.asJsonNode(zone))
