@@ -42,7 +42,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [ ]  Dataproc
 - [ ]  Datastore
 - [ ]  Dialogflow
-- [ ]  Error Reporting
+- [x]  Error Reporting
 - [ ]  Firestore
 - [ ]  Game Servers
 - [x]  Google Kubernetes Engine
