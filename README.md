@@ -31,13 +31,13 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [x]  Cloud Spanner
 - [x]  Cloud Scheduler
 - [x]  Cloud Storage
-- [ ]  Cloud Talent Solution Job Search
+- [x]  Cloud Talent Solution Job Search
 - [x]  Cloud Tasks
-- [ ]  Cloud Trace
+- [x]  Cloud Trace
 - [x]  Cloud Translation
-- [ ]  Cloud Vision
-- [ ]  Compute Engine
-- [ ]  Container Analysis
+- [x]  Cloud Vision
+- [x]  Compute Engine
+- [x]  Container Analysis
 - [x]  Data Catalog
 - [ ]  Dataproc
 - [ ]  Datastore
