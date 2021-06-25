@@ -215,6 +215,11 @@
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-containeranalysis</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-gameservices</artifactId>
+      <version>0.19.1</version>
+    </dependency>
 
     <dependency>
       <groupId>com.google.appengine</groupId>

@@ -44,7 +44,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [ ]  Dialogflow
 - [ ]  Error Reporting
 - [ ]  Firestore
-- [ ]  Game Servers
+- [x]  Game Servers
 - [x]  Google Kubernetes Engine
 - [ ]  Identity and Access Management
 - [x]  IoT Core

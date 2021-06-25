@@ -53,6 +53,7 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
     new DataLabelingDiscovery(),
     new SecretDiscovery(),
     new StorageDiscovery(),
+    new GameServicesDiscovery(),
     new SpannerDiscovery(),
     new SchedulerDiscovery(),
     new RedisDiscovery(),
