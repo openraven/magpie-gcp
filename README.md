@@ -39,9 +39,9 @@ export GOOGLE_APPLICATION_CREDENTIALS=PATH_TO_CREDENTIALS_JSON_FILE
 - [x]  Compute Engine
 - [x]  Container Analysis
 - [x]  Data Catalog
-- [ ]  Dataproc
+- [x]  Dataproc
 - [ ]  Datastore
-- [ ]  Dialogflow
+- [x]  Dialogflow
 - [ ]  Error Reporting
 - [ ]  Firestore
 - [x]  Game Servers
