@@ -61,7 +61,7 @@ public class PubSubLiteDiscovery implements GCPDiscovery {
         .withConfiguration(GCPUtils.asJsonNode(element))
         .build();
 
-      emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":secret"), data.toJsonNode()));
+      emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":subscription"), data.toJsonNode()));
     }
   }
 
@@ -76,7 +76,7 @@ public class PubSubLiteDiscovery implements GCPDiscovery {
         .withConfiguration(GCPUtils.asJsonNode(element))
         .build();
 
-      emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":secret"), data.toJsonNode()));
+      emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":topic"), data.toJsonNode()));
     }
   }
 }
