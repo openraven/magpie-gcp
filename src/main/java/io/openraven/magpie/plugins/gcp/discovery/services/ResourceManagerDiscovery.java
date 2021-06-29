@@ -17,8 +17,13 @@
 package io.openraven.magpie.plugins.gcp.discovery.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.appengine.repackaged.com.google.common.base.Pair;
+import com.google.cloud.resourcemanager.Project;
+import com.google.cloud.resourcemanager.ResourceManagerOptions;
+import com.google.cloud.resourcemanager.v3.Organization;
+import com.google.cloud.resourcemanager.v3.OrganizationsClient;
+import com.google.cloud.resourcemanager.v3.ProjectName;
 import com.google.cloud.resourcemanager.v3.ProjectsClient;
-import com.google.cloud.resourcemanager.v3.TagValueName;
 import io.openraven.magpie.api.Emitter;
 import io.openraven.magpie.api.MagpieResource;
 import io.openraven.magpie.api.Session;
@@ -39,50 +44,65 @@ public class ResourceManagerDiscovery implements GCPDiscovery {
   }
 
   public void discover(ObjectMapper mapper, String projectId, Session session, Emitter emitter, Logger logger) {
-    final String RESOURCE_TYPE = "GCP::ResourceManager::Secret";
+    discoverOrganization(mapper, projectId, session, emitter);
+    discoverProjects(mapper, projectId, session, emitter);
+  }
 
-    try (var projectsClient = ProjectsClient.create()) {
-      String parent = TagValueName.of("[TAG_VALUE]").toString();
-      for (var element : projectsClient.listProjects(parent).iterateAll()) {
-        var data = new MagpieResource.MagpieResourceBuilder(mapper, element.getName())
+  private void discoverOrganization(ObjectMapper mapper, String projectId, Session session, Emitter emitter) {
+    final String RESOURCE_TYPE = "GCP::ResourceManager::Organization";
+
+    try (var projectsClient = OrganizationsClient.create()) {
+      for (var organization : projectsClient.searchOrganizations("").iterateAll()) {
+        var data = new MagpieResource.MagpieResourceBuilder(mapper, organization.getName())
           .withProjectId(projectId)
           .withResourceType(RESOURCE_TYPE)
-          .withConfiguration(GCPUtils.asJsonNode(element))
+          .withConfiguration(GCPUtils.asJsonNode(organization))
           .build();
 
-        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":org"), data.toJsonNode()));
+        discoverOrganizationIamPolicy(projectsClient, organization, data);
+
+        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":organization"), data.toJsonNode()));
       }
     } catch (IOException e) {
       DiscoveryExceptions.onDiscoveryException(RESOURCE_TYPE, e);
     }
+  }
 
-//    try (var organizationsClient = OrganizationsClient.create()) {
-//      for (var element : organizationsClient.searchOrganizations("").iterateAll()) {
-//        var data = new MagpieResource.MagpieResourceBuilder(mapper, element.getName())
-//          .withProjectId(projectId)
-//          .withResourceType(RESOURCE_TYPE)
-//          .withConfiguration(GCPUtils.asJsonNode(element))
-//          .build();
-//
-//        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":org"), data.toJsonNode()));
-//      }
-//    } catch (IOException e) {
-//      DiscoveryExceptions.onDiscoveryException(RESOURCE_TYPE, e);
-//    }
+  private void discoverOrganizationIamPolicy(OrganizationsClient projectsClient, Organization organization, MagpieResource data) {
+    final String fieldName = "iamPolicy";
 
-//    try (var projectsClient = ProjectsClient.create()) {
-//      String parent = TagValueName.of("[TAG_VALUE]").toString();
-//      for (var element : projectsClient.listProjects(parent).iterateAll()) {
-//        var data = new MagpieResource.MagpieResourceBuilder(mapper, element.getName())
-//          .withProjectId(projectId)
-//          .withResourceType(RESOURCE_TYPE)
-//          .withConfiguration(GCPUtils.asJsonNode(element))
-//          .build();
-//
-//        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":element"), data.toJsonNode()));
-//      }
-//    } catch (IOException e) {
-//      DiscoveryExceptions.onDiscoveryException(RESOURCE_TYPE, e);
-//    }
+    GCPUtils.update(data.supplementaryConfiguration, Pair.of(fieldName, projectsClient.getIamPolicy(organization.getName()).toBuilder()));
+  }
+
+  private void discoverProjects(ObjectMapper mapper, String projectId, Session session, Emitter emitter) {
+    final String RESOURCE_TYPE = "GCP::ResourceManager::Project";
+
+    try (var projectsClient = ProjectsClient.create()) {
+      getProjectList().forEach(project -> {
+        var data = new MagpieResource.MagpieResourceBuilder(mapper, project.getName())
+          .withProjectId(projectId)
+          .withResourceType(RESOURCE_TYPE)
+          .withConfiguration(GCPUtils.asJsonNode(project))
+          .build();
+
+        discoverProjectIamPolicy(projectsClient, project, data);
+
+        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":project"), data.toJsonNode()));
+      });
+    } catch (IOException e) {
+      DiscoveryExceptions.onDiscoveryException(RESOURCE_TYPE, e);
+    }
+  }
+
+  private void discoverProjectIamPolicy(ProjectsClient projectsClient, Project project, MagpieResource data) {
+    final String fieldName = "iamPolicy";
+    String resource = ProjectName.of(project.getProjectId()).toString();
+
+    GCPUtils.update(data.supplementaryConfiguration, Pair.of(fieldName, projectsClient.getIamPolicy(resource).toBuilder()));
+  }
+
+  Iterable<com.google.cloud.resourcemanager.Project> getProjectList() {
+    var resourceManager = ResourceManagerOptions.getDefaultInstance().getService();
+    return resourceManager.list().iterateAll();
   }
 }

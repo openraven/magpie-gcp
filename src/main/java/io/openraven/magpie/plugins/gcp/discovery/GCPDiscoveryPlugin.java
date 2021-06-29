@@ -35,7 +35,7 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
   public final static String ID = "magpie.gcp.discovery";
   protected static final ObjectMapper MAPPER = GCPUtils.createObjectMapper();
 
-  private static final List<GCPDiscovery> DISCOVERY_LIST = List.of(
+  private static final List<GCPDiscovery> PER_PROJECT_DISCOVERY_LIST = List.of(
     new AccessApprovalDiscovery(),
     new AutoMLDiscovery(),
     new AssetDiscovery(),
@@ -76,9 +76,11 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
     new VisionDiscovery(),
     new OsConfigDiscovery(),
     new FunctionsDiscovery(),
-    new ResourceManagerDiscovery(),
     new RecaptchaEnterpriseDiscovery(),
     new WebSecurityScannerDiscovery());
+
+  private static final List<GCPDiscovery> SINGLE_DISCOVERY_LIST = List.of(
+    new ResourceManagerDiscovery());
 
   GCPDiscoveryConfig config;
 
@@ -86,7 +88,7 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
 
   @Override
   public void discover(Session session, Emitter emitter) {
-    getProjectList().forEach(project -> DISCOVERY_LIST
+    getProjectList().forEach(project -> PER_PROJECT_DISCOVERY_LIST
       .stream()
       .filter(service -> isEnabled(service.service()))
       .forEach(gcpDiscovery -> {
@@ -96,6 +98,17 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
           logger.error("{} While discovering {} service in {}", permissionDeniedException.getMessage(), gcpDiscovery.service(), project.getProjectId());
         }
       }));
+
+
+    SINGLE_DISCOVERY_LIST.stream()
+      .filter(service -> isEnabled(service.service()))
+      .forEach(service -> {
+      try {
+        service.discoverWrapper(MAPPER, null, session, emitter, logger);
+      } catch (PermissionDeniedException permissionDeniedException) {
+        logger.error("{} While discovering {} service", permissionDeniedException.getMessage(), service.service());
+      }
+    });
   }
 
   Iterable<Project> getProjectList() {
