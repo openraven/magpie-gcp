@@ -18,12 +18,7 @@ package io.openraven.magpie.plugins.gcp.discovery.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.appengine.repackaged.com.google.common.base.Pair;
-import com.google.cloud.resourcemanager.Project;
-import com.google.cloud.resourcemanager.ResourceManagerOptions;
-import com.google.cloud.resourcemanager.v3.Organization;
-import com.google.cloud.resourcemanager.v3.OrganizationsClient;
-import com.google.cloud.resourcemanager.v3.ProjectName;
-import com.google.cloud.resourcemanager.v3.ProjectsClient;
+import com.google.cloud.resourcemanager.v3.*;
 import io.openraven.magpie.api.Emitter;
 import io.openraven.magpie.api.MagpieResource;
 import io.openraven.magpie.api.Session;
@@ -46,20 +41,21 @@ public class ResourceManagerDiscovery implements GCPDiscovery {
   public void discover(ObjectMapper mapper, String projectId, Session session, Emitter emitter, Logger logger) {
     discoverOrganization(mapper, projectId, session, emitter);
     discoverProjects(mapper, projectId, session, emitter);
+    discoverFolders(mapper, projectId, session, emitter);
   }
 
   private void discoverOrganization(ObjectMapper mapper, String projectId, Session session, Emitter emitter) {
     final String RESOURCE_TYPE = "GCP::ResourceManager::Organization";
 
-    try (var projectsClient = OrganizationsClient.create()) {
-      for (var organization : projectsClient.searchOrganizations("").iterateAll()) {
+    try (var client = OrganizationsClient.create()) {
+      for (var organization : client.searchOrganizations("").iterateAll()) {
         var data = new MagpieResource.MagpieResourceBuilder(mapper, organization.getName())
           .withProjectId(projectId)
           .withResourceType(RESOURCE_TYPE)
           .withConfiguration(GCPUtils.asJsonNode(organization))
           .build();
 
-        discoverOrganizationIamPolicy(projectsClient, organization, data);
+        discoverOrganizationIamPolicy(client, organization, data);
 
         emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":organization"), data.toJsonNode()));
       }
@@ -68,41 +64,63 @@ public class ResourceManagerDiscovery implements GCPDiscovery {
     }
   }
 
-  private void discoverOrganizationIamPolicy(OrganizationsClient projectsClient, Organization organization, MagpieResource data) {
+  private void discoverOrganizationIamPolicy(OrganizationsClient client, Organization organization, MagpieResource data) {
     final String fieldName = "iamPolicy";
 
-    GCPUtils.update(data.supplementaryConfiguration, Pair.of(fieldName, projectsClient.getIamPolicy(organization.getName()).toBuilder()));
+    GCPUtils.update(data.supplementaryConfiguration, Pair.of(fieldName, client.getIamPolicy(organization.getName()).toBuilder()));
   }
 
   private void discoverProjects(ObjectMapper mapper, String projectId, Session session, Emitter emitter) {
     final String RESOURCE_TYPE = "GCP::ResourceManager::Project";
 
-    try (var projectsClient = ProjectsClient.create()) {
-      getProjectList().forEach(project -> {
+    try (var client = ProjectsClient.create()) {
+      for (var project : client.searchProjects("").iterateAll()) {
         var data = new MagpieResource.MagpieResourceBuilder(mapper, project.getName())
           .withProjectId(projectId)
           .withResourceType(RESOURCE_TYPE)
           .withConfiguration(GCPUtils.asJsonNode(project))
           .build();
 
-        discoverProjectIamPolicy(projectsClient, project, data);
+        discoverProjectIamPolicy(client, project, data);
 
         emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":project"), data.toJsonNode()));
-      });
+      }
     } catch (IOException e) {
       DiscoveryExceptions.onDiscoveryException(RESOURCE_TYPE, e);
     }
   }
 
-  private void discoverProjectIamPolicy(ProjectsClient projectsClient, Project project, MagpieResource data) {
+  private void discoverProjectIamPolicy(ProjectsClient client, Project project, MagpieResource data) {
     final String fieldName = "iamPolicy";
     String resource = ProjectName.of(project.getProjectId()).toString();
 
-    GCPUtils.update(data.supplementaryConfiguration, Pair.of(fieldName, projectsClient.getIamPolicy(resource).toBuilder()));
+    GCPUtils.update(data.supplementaryConfiguration, Pair.of(fieldName, client.getIamPolicy(resource).toBuilder()));
   }
 
-  Iterable<com.google.cloud.resourcemanager.Project> getProjectList() {
-    var resourceManager = ResourceManagerOptions.getDefaultInstance().getService();
-    return resourceManager.list().iterateAll();
+  private void discoverFolders(ObjectMapper mapper, String projectId, Session session, Emitter emitter) {
+    final String RESOURCE_TYPE = "GCP::ResourceManager::Folder";
+
+    try (var client = FoldersClient.create()) {
+      for (var folder : client.searchFolders("").iterateAll()) {
+        var data = new MagpieResource.MagpieResourceBuilder(mapper, folder.getName())
+          .withProjectId(projectId)
+          .withResourceType(RESOURCE_TYPE)
+          .withConfiguration(GCPUtils.asJsonNode(folder))
+          .build();
+
+        discoverFolderIamPolicy(client, folder, data);
+
+        emitter.emit(VersionedMagpieEnvelopeProvider.create(session, List.of(fullService() + ":folder"), data.toJsonNode()));
+      }
+    } catch (IOException e) {
+      DiscoveryExceptions.onDiscoveryException(RESOURCE_TYPE, e);
+    }
+  }
+
+  private void discoverFolderIamPolicy(FoldersClient client, Folder folder, MagpieResource data) {
+    final String fieldName = "iamPolicy";
+    String resource = ProjectName.of(folder.getName()).toString();
+
+    GCPUtils.update(data.supplementaryConfiguration, Pair.of(fieldName, client.getIamPolicy(resource).toBuilder()));
   }
 }

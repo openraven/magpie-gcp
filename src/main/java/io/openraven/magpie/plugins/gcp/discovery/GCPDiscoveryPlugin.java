@@ -18,8 +18,7 @@ package io.openraven.magpie.plugins.gcp.discovery;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.gax.rpc.PermissionDeniedException;
-import com.google.cloud.resourcemanager.Project;
-import com.google.cloud.resourcemanager.ResourceManagerOptions;
+import com.google.cloud.resourcemanager.v3.ProjectsClient;
 import io.openraven.magpie.api.Emitter;
 import io.openraven.magpie.api.OriginPlugin;
 import io.openraven.magpie.api.Session;
@@ -27,6 +26,8 @@ import io.openraven.magpie.plugins.gcp.discovery.services.*;
 import io.sentry.Sentry;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -93,9 +94,9 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
       .filter(service -> isEnabled(service.service()))
       .forEach(gcpDiscovery -> {
         try {
-          gcpDiscovery.discoverWrapper(MAPPER, project.getProjectId(), session, emitter, logger);
+          gcpDiscovery.discoverWrapper(MAPPER, project, session, emitter, logger);
         } catch (PermissionDeniedException permissionDeniedException) {
-          logger.error("{} While discovering {} service in {}", permissionDeniedException.getMessage(), gcpDiscovery.service(), project.getProjectId());
+          logger.error("{} While discovering {} service in {}", permissionDeniedException.getMessage(), gcpDiscovery.service(), project);
         }
       }));
 
@@ -111,9 +112,16 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
     });
   }
 
-  Iterable<Project> getProjectList() {
-    var resourceManager = ResourceManagerOptions.getDefaultInstance().getService();
-    return resourceManager.list().iterateAll();
+  List<String> getProjectList() {
+    var projects = new ArrayList<String>();
+
+    try (ProjectsClient projectsClient = ProjectsClient.create()) {
+      projectsClient.searchProjects("").iterateAll().forEach(project -> projects.add(project.getProjectId()));
+    } catch (IOException e) {
+      DiscoveryExceptions.onDiscoveryException("Project::List", e);
+    }
+
+    return  projects;
   }
 
   @Override
