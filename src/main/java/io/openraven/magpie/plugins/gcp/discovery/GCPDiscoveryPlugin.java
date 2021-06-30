@@ -64,6 +64,7 @@ public class GCPDiscoveryPlugin implements OriginPlugin<GCPDiscoveryConfig> {
     new MemcacheDiscovery(),
     new MonitoringDiscovery(),
     new MonitoringDashboardDiscovery(),
+    new IamDiscovery(),
     new IoTDiscovery(),
     new LoggingDiscovery(),
     new DataCatalogDiscovery(),
