@@ -1,5 +1,5 @@
 # magpie-gcp
-Temporary location for the Magpie GCP Discovery Plugin (WIP).  *This repo will be merged into https://github.com/openraven/magpie in the near future*
+This repo is no longer updated as its contents (and the Magpie GCP Plugin itself) have been merged into the main Magpie repository at https://github.com/openraven/magpie
 
 # Authentcation
 To use this plugin save .json file with authentication key to file then set:
